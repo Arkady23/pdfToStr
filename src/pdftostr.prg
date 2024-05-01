@@ -1,16 +1,16 @@
 *
-*   ÈÇÂËÅ×ÅÍÈÅ ÑÒÐÀÍÈÖÛ n1 ÈËÈ ÈÍÒÅÐÂÀËÀ ÑÒÐÀÍÈÖ ÎÒ n1 ÄÎ n2 ÈÇ pdf 
+*   ИЗВЛЕЧЕНИЕ СТРАНИЦЫ n1 ИЛИ ИНТЕРВАЛА СТРАНИЦ ОТ n1 ДО n2 ИЗ pdf 
 *   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-*   Ïðèìå÷àíèå: Íà âûõîäå ïåðåìåííàÿ, êîòîðàÿ ìîæåò áûòü ïåðåäàíà
-*               ÷åðåç èíòåðíåò èëè ñîõðàíåíà â ôàéë.pdf.
-*   Àâòîð: Êîðíèåíêî Àðêàäèé Áîðèñîâè÷
-*   Äàòà:  29.04.2024
+*   Примечание: На выходе переменная, которая может быть передана
+*               через интернет или сохранена в файл.pdf.
+*   Автор: Корниенко Аркадий Борисович
+*   Дата:  29.04.2024
 *
 para pdf,n1,n2
   priv i,j,k,m,b,c,na,nf,nObj,xref,xref2,verPdf,v,x,y
   x=""
   if file(m.pdf)
-    bc='cPdf' && êîíñòàíòû
+    bc='cPdf' && константы
     bu="<<"
     bz=">>"
     bs="/"
@@ -36,36 +36,36 @@ para pdf,n1,n2
       n2=m.n1
     endi
     
-    ** 1. ÷òåíèå õâîñòà pdf
+    ** 1. чтение хвоста pdf
     nf=fopen(m.pdf)
     =fseek(m.nf,-40,m.i2)
     do e_pdf
     
-    ** 2. ÷òåíèå íà÷àëà
+    ** 2. чтение начала
     =fseek(m.nf,m.i0)
     verPdf=fget(m.nf)
     if m.xref2=m.i0
-      ** åñëè ìàðêåð startxref â êîíöå ôàéëà íå íàéäåí, èùåì ñ íà÷àëà
+      ** если маркер startxref в конце файла не найден, ищем с начала
       do e_pdf
     endi
     if m.nObj>m.i0
       =fseek(m.nf,m.xref2)
 
-      ** 3. Ôîðìèðóåì ìàññèâ ññûëîê íà îáúåêòû
+      ** 3. Формируем массив ссылок на объекты
       dime aObj(m.nObj),qObj(m.nObj),cObj(m.nObj),kObj(m.nObj),aTmp(m.i1)
       stor m.i0 to kObj
       j=m.nObj
       for i=m.i1 to m.nObj
         c=iif(feof(m.nf),m.b,fget(m.nf))
         aObj(m.j)=val(m.c)
-        ** èñïðàâëÿåì ïðîáëåìó îòñóòñòâèÿ íóëåâîãî èíäåêñà ìàññèâà íà VFP
+        ** исправляем проблему отсутствия нулевого индекса массива на VFP
         if m.j=m.nObj
           j=m.i0
         endi
         j=m.j+m.i1
       endf
 
-      ** 4. Ôîðìèðóåì ìàññèâ ðàçìåðîâ îáúåêòîâ
+      ** 4. Формируем массив размеров объектов
       k=m.nObj-m.i1
       for i=m.i1 to m.k
         v=m.xref
@@ -77,7 +77,7 @@ para pdf,n1,n2
         qObj(m.i)=m.v-aObj(m.i)
       endf
 
-      ** 5. ×òåíèå íóæíûõ, âêëþ÷àÿ "Info", "Root", "Kids", îáúåêòîâ
+      ** 5. Чтение нужных, включая "Info", "Root", "Kids", объектов
       c=iif(feof(m.nf),m.b,fget(m.nf))
       if m.c=m.trailer
         do whil not feof(m.nf)
@@ -90,7 +90,7 @@ para pdf,n1,n2
         =fclo(m.nf)
         nf=-m.i1
 
-        ** 6. ïåðåèíäåêñèðîâàíèå îáúåêòîâ
+        ** 6. переиндексирование объектов
         k=3
         na=m.nObj
         do whil m.na>m.k
@@ -110,16 +110,16 @@ para pdf,n1,n2
           na=m.na+1
         endd
 
-        ** 7. ôîðìèðîâàíèå ñòðîêè m.x
+        ** 7. формирование строки m.x
         x=m.verPdf+m.c10
         for i=m.i1 to m.na-m.i1
           if kObj(m.i)>m.i0
             aObj(m.i)=len(m.x)
             if kObj(m.i)>m.i1
-              * ìåíÿåì ññûëêó â ïåðâîé ñòðîêå
+              * меняем ссылку в первой строке
               k=iif(kObj(m.i)>m.i2,kObj(m.i),m.i)
               c=subs(cObj(m.k),at(" obj",cObj(m.k))+m.i1)
-              * ìåíÿåì ññûëêè â îñòàëüíûõ ñòðîêàõ
+              * меняем ссылки в остальных строках
               j=m.i1
               do whil m.k>m.i0
                 k=at(m.zR,m.c,m.j)
@@ -128,7 +128,7 @@ para pdf,n1,n2
                   m=rat(m.b,m.y)+m.i1
                   v=val(subs(m.y,m.m))
                   if m.v>=m.na and m.v<=m.nObj
-                    * áûëî m.v, ñòàëî kObj(m.v)
+                    * было m.v, стало kObj(m.v)
                     c=stuf(m.c,m.m,m.k-m.m,tran(kObj(m.v)))
                   endi
                   j=m.j+m.i1
@@ -136,11 +136,11 @@ para pdf,n1,n2
               endd
               x=m.x+tran(m.i)+m.b+m.b0+m.b+m.c
             else
-              * íè÷åãî íå ìåíÿåì
+              * ничего не меняем
               x=m.x+cObj(m.i)
             endi
           else
-            * ñâîáîäíûé îáúåêò ïðåäóñìîòðåí, íî èõ íå äîëæíî èõ áûòü
+            * свободный объект предусмотрен, но их не должно их быть
             aObj(m.i)=m.i0
           endi
         endf
@@ -165,7 +165,7 @@ para pdf,n1,n2
 retu m.x
 
 proc e_pdf
-  ** ÷òåíèå õâîñòà pdf
+  ** чтение хвоста pdf
   do whil not feof(m.nf)
     c=fget(m.nf)
     if left(m.c,m.i1)<>"%"
@@ -188,7 +188,7 @@ proc e_pdf
   endd
 
 func wd2(c,k)
-  ** âûäåëåíèå k-ãî ñëîâà èç òåêñòà, k=0 - ïîñëåäíåå ñëîâî â ñòðîêå, -1 ïðåäïîñëåäíåå è ò.ä.
+  ** выделение k-го слова из текста, k=0 - последнее слово в строке, -1 предпоследнее и т.д.
   local z
   na=aline(aTmp,m.c,4,m.b)
   do case
@@ -203,7 +203,7 @@ func wd2(c,k)
 retu m.z
 
 func pole2(c,k)
-** ïîèñê êîíöà ïîëÿ çíà÷åíèé â m.c çà ïîçèöèåé k
+** поиск конца поля значений в m.c за позицией k
 retu m.k+at(m.bs,strt(subs(m.c,k+m.i1),">",m.bs)+m.bs)
 
 defi class cPdf as custom
@@ -212,8 +212,8 @@ defi class cPdf as custom
     k=aline(ac,strt(stre(m.c,m.bu,"stream",1,2),m.b1,m.b)+m.ba,m.i1,m.zR)
     if m.k>m.i1
       if m.iKids=m.i0
-        ** À åñëè â ýòîé ñòðîêå ñïèñîê ñòðàíèö, òî åãî íàäî ìîäèôèöèðîâàòü
-        ** â ñîîòâåòñòâèè ñ çàäàííûì èíòåðâàëîì âûâîäà íóæíûõ ñòðàíèö
+        ** А если в этой строке список страниц, то его надо модифицировать
+        ** в соответствии с заданным интервалом вывода нужных страниц
         f=at(m.kids,m.c)
         if m.f>m.i0
           for i=m.i1 to m.k-m.i1
@@ -222,7 +222,7 @@ defi class cPdf as custom
               iKids=m.iObj
               j=val(wd2(ac(m.i),m.i0))
               if m.j>m.i0 and m.j<=m.nObj
-                ** èçìåíÿåì ñïèñîê îáúåêòîâ ñîãëàñíî ïàðàìåòðîâ
+                ** изменяем список объектов согласно параметров
                 ac(m.i)=subs(ac(m.i),m.h+6)
                 stor m.i0 to g,h
                 y=m.b
@@ -238,7 +238,7 @@ defi class cPdf as custom
                 endf
                 h=pole2(@c,m.f)
                 c=left(m.c,m.f+4)+m.b+m.b1+m.y+"]"+subs(m.c,m.h)
-                ** èçìåíÿåì êîëè÷åñòâî ñòðàíèö â /Count
+                ** изменяем количество страниц в /Count
                 m=at("/Count",m.c)
                 h=pole2(@c,m.m)
                 c=left(m.c,m.m+5)+m.b+tran(m.g)+subs(m.c,m.h)
@@ -259,11 +259,11 @@ defi class cPdf as custom
             if m.iRoot=m.i0 and m.root $ ac(m.i)
               iRoot=m.j
             endi
-            ** ïðî÷èòàòü îáúåêò
+            ** прочитать объект
             =fseek(m.nf,aObj(m.j))
             cObj(m.j)=m.x
             c2=iif(feof(m.nf),m.x,fread(m.nf,qObj(m.j)))
-            ** cìîòðåòü ñîäåðæàíèå îáúåêòà äàëüøå
+            ** cмотреть содержание объекта дальше
             oPdf2=createObj(m.bc)
             oPdf2.scan(m.c2,m.j)
             rele oPdf2
