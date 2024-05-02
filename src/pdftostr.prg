@@ -163,11 +163,11 @@ para pdf,n1,n2
           tran(m.na)+m.bz+m.c10+m.sxref+m.c10+tran(m.k)+m.c10+"%%EOF"+m.c10
       endi
     endi
-    if m.exact
-      set exact off
-    endi
     if m.nf>=m.i0
       =fclo(m.nf)
+    endi
+    if m.exact
+      set exact off
     endi
   endi
 retu m.x
