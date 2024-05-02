@@ -7,7 +7,7 @@
 *   Дата:  29.04.2024
 *
 para pdf,n1,n2
-  priv i,j,k,m,b,c,na,nf,nObj,xref,xref2,verPdf,v,x,y
+  priv i,j,k,m,b,c,na,nf,nObj,exact,eoff,xref,xref2,verPdf,v,x,y
   x=""
   if file(m.pdf)
     bc='cPdf' && константы
@@ -22,6 +22,7 @@ para pdf,n1,n2
     stor 0 to i0,xref,xref2,nObj,iInfo,iRoot,iKids
     zR=" 0 R"
     ba=" B A"
+    eoff="OFF"
     xf=" 65536 f"
     xn=" 00000 n"
     trailer="trailer"
@@ -32,6 +33,10 @@ para pdf,n1,n2
     f10="@L "+replic("9",10)
     c10=chr(10)
     oPdf=createObj(m.bc)
+    exact= set("exact")=m.eoff
+    if m.exact
+      set exact on
+    endi
     if type("m.n2")<>"N"
       n2=m.n1
     endi
@@ -157,6 +162,9 @@ para pdf,n1,n2
           m.zR+m.b+m.root+m.b+tran(iif(m.iRoot>m.na,kObj(m.iRoot),m.iRoot))+m.zR+" /Size "+ ;
           tran(m.na)+m.bz+m.c10+m.sxref+m.c10+tran(m.k)+m.c10+"%%EOF"+m.c10
       endi
+    endi
+    if m.exact
+      set exact off
     endi
     if m.nf>=m.i0
       =fclo(m.nf)
