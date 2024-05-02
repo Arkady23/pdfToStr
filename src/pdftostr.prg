@@ -4,7 +4,7 @@
 *   Примечание: На выходе переменная, которая может быть передана
 *               через интернет или сохранена в файл.pdf.
 *   Автор: Корниенко Аркадий Борисович
-*   Дата:  02.05.2024
+*   Дата:  29.04.2024
 *
 para pdf,n1,n2
   priv ALL
@@ -150,12 +150,12 @@ para pdf,n1,n2
           endi
         endf
         k=len(m.x)
-        x=m.x+"xref"+m.c10+m.b0+m.b+tran(m.na)+m.c10+replic(m.b0,10)+m.xf+m.c10
+        x=m.x+"xref"+m.c10+m.b0+m.b+tran(m.na)+m.c10+replic(m.b0,10)+m.xf+m.b+m.c10
         for i=m.i1 to m.na-m.i1
           if empt(aObj(m.i))
-            x=m.x+tran(m.i,m.f10)+m.xf+m.c10
+            x=m.x+tran(m.i,m.f10)+m.xf+m.b+m.c10
           else
-            x=m.x+tran(aObj(m.i),m.f10)+m.xn+m.c10
+            x=m.x+tran(aObj(m.i),m.f10)+m.xn+m.b+m.c10
           endi
         endf
         x=m.x+m.trailer+m.c10+m.bu+m.info+m.b+tran(iif(m.iInfo>m.na,kObj(m.iInfo),m.iInfo))+ ;
@@ -163,11 +163,11 @@ para pdf,n1,n2
           tran(m.na)+m.bz+m.c10+m.sxref+m.c10+tran(m.k)+m.c10+"%%EOF"+m.c10
       endi
     endi
-    if m.nf>=m.i0
-      =fclo(m.nf)
-    endi
     if m.exact
       set exact off
+    endi
+    if m.nf>=m.i0
+      =fclo(m.nf)
     endi
   endi
 retu m.x
