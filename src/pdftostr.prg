@@ -7,7 +7,7 @@
 *   Дата:  02.05.2024
 *
 para pdf,n1,n2
-  priv i,j,k,m,b,c,na,nf,nObj,exact,eoff,xref,xref2,verPdf,v,x,y
+  priv ALL
   x=""
   if file(m.pdf)
     bc='cPdf' && константы
