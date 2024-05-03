@@ -77,8 +77,8 @@ para pdf,n1,n2
       k=m.nObj-m.i1
       for i=m.i1 to m.k
         v=m.xref
-        for j=m.i to m.k
-          if aObj(m.j)>aObj(m.i) and aObj(m.j)<m.v
+        for j=m.i1 to m.k
+          if aObj(m.j)>aObj(m.i) and aObj(m.j)<m.v and m.j<>m.i
             v=aObj(m.j)
           endi
         endf
@@ -135,6 +135,13 @@ para pdf,n1,n2
                   y=rtri(left(m.c,m.k))
                   m=rat(m.b,m.y)+m.i1
                   v=val(subs(m.y,m.m))
+                  if qObj(m.v)<m.i0
+                    * было m.v, стало -qObj(m.v)
+                    v= -qObj(m.v)
+                    if m.v<m.na
+                      c=stuf(m.c,m.m,m.k-m.m,tran(m.v))
+                    endi
+                  endi
                   if m.v>=m.na and m.v<=m.nObj
                     * было m.v, стало kObj(m.v)
                     c=stuf(m.c,m.m,m.k-m.m,tran(kObj(m.v)))
@@ -237,12 +244,14 @@ defi class cPdf as custom
                 ac(m.i)=subs(ac(m.i),m.h+6)
                 stor m.i0 to g,h
                 y=m.b
-                for m=m.i to m.k
+                for m=m.i to m.k-m.i1
                   ** заглянем в этот объект на случай, если там скрывается дочерний Kids
                   d=val(ac(m.m))
                   =fseek(m.nf,aObj(m.d))
                   c2=iif(feof(m.nf),m.x,stre(fread(m.nf,qObj(m.d)),m.kids,m.b2,m.i1,m.i2))
                   if len(m.c2)>m.i0
+                    ** Объект d удаляем, ссылки на него переводим на iKids
+                    qObj(m.d)= -m.iKids
                     d=aline(ac2,stre(m.c2,m.b1,m.b2,m.i1,m.i2),m.i1,m.zR)
                   else
                     ac2(m.i1)=ac(m.m)
@@ -250,13 +259,13 @@ defi class cPdf as custom
                   endi
                   ** формируем новый список страниц
                   for e=m.i1 to m.d
-                    h=m.h+m.i1
-                    if m.h>=m.n1
-                      g=m.g+m.i1
-                      y=m.y+tran(val(ac2(m.e)))+m.zR+m.b
-                    endi
-                    if m.h>=m.n2
-                      m=m.k+m.i1
+                    if m.h<m.n2
+                      h=m.h+m.i1
+                      if m.h>=m.n1
+                        g=m.g+m.i1
+                        y=m.y+tran(val(ac2(m.e)))+m.zR+m.b
+                      endi
+                    else
                       exit
                     endi
                   endf
@@ -284,14 +293,16 @@ defi class cPdf as custom
             if m.iRoot=m.i0 and m.root $ ac(m.i)
               iRoot=m.j
             endi
-            ** прочитать объект
-            =fseek(m.nf,aObj(m.j))
-            cObj(m.j)=m.x
-            c2=iif(feof(m.nf),m.x,fread(m.nf,qObj(m.j)))
-            ** cмотреть содержание объекта дальше
-            oPdf2=createObj(m.bc)
-            oPdf2.scan(m.c2,m.j)
-            rele oPdf2
+            if qObj(m.j)>m.i0
+              ** прочитать объект
+              =fseek(m.nf,aObj(m.j))
+              cObj(m.j)=m.x
+              c2=iif(feof(m.nf),m.x,fread(m.nf,qObj(m.j)))
+              ** cмотреть содержание объекта дальше
+              oPdf2=createObj(m.bc)
+              oPdf2.scan(m.c2,m.j)
+              rele oPdf2
+            endi
           endi
         endi
       endf
