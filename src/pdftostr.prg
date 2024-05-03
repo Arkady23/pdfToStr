@@ -15,10 +15,13 @@ para pdf,n1,n2
     bz=">>"
     bs="/"
     b1="["
+    b2="]"
     b0="0"
     b=" "
     i1=1
     i2=2
+    i4=4
+    ia=10
     stor 0 to i0,xref,xref2,nObj,iInfo,iRoot,iKids
     zR=" 0 R"
     ba=" B A"
@@ -30,8 +33,8 @@ para pdf,n1,n2
     info="/Info"
     root="/Root"
     kids="/Kids"
-    f10="@L "+replic("9",10)
-    c10=chr(10)
+    f10="@L "+replic("9",m.ia)
+    c10=chr(m.ia)
     oPdf=createObj(m.bc)
     exact= set("exact")=m.eoff
     if m.exact
@@ -86,12 +89,12 @@ para pdf,n1,n2
       c=iif(feof(m.nf),m.b,fget(m.nf))
       if m.c=m.trailer
         do whil not feof(m.nf)
-          c=fget(m.nf)
-          =oPdf.scan(@c,m.i0)
+          c=m.c+fget(m.nf)
           if righ(m.c,m.i2)=m.bz
             exit
           endi
         endd
+        =oPdf.scan(@c,m.i0)
         =fclo(m.nf)
         nf=-m.i1
 
@@ -112,7 +115,7 @@ para pdf,n1,n2
           na=m.na-m.i1
         endd
         do whil kObj(m.na)=m.i1 or kObj(m.na)=m.i2
-          na=m.na+1
+          na=m.na+m.i1
         endd
 
         ** 7. формирование строки m.x
@@ -150,7 +153,7 @@ para pdf,n1,n2
           endi
         endf
         k=len(m.x)
-        x=m.x+"xref"+m.c10+m.b0+m.b+tran(m.na)+m.c10+replic(m.b0,10)+m.xf+m.b+m.c10
+        x=m.x+"xref"+m.c10+m.b0+m.b+tran(m.na)+m.c10+replic(m.b0,m.ia)+m.xf+m.b+m.c10
         for i=m.i1 to m.na-m.i1
           if empt(aObj(m.i))
             x=m.x+tran(m.i,m.f10)+m.xf+m.b+m.c10
@@ -198,7 +201,7 @@ proc e_pdf
 func wd2(c,k)
   ** выделение k-го слова из текста, k=0 - последнее слово в строке, -1 предпоследнее и т.д.
   local z
-  na=aline(aTmp,m.c,4,m.b)
+  na=aline(aTmp,m.c,m.i4,m.b)
   do case
   case m.k>m.i0
     z=iif(m.k>m.na,m.b,aTmp(m.k))
@@ -216,8 +219,8 @@ retu m.k+at(m.bs,strt(subs(m.c,k+m.i1),">",m.bs)+m.bs)
 
 defi class cPdf as custom
   Func scan(c,iObj)
-    local ac(m.i1),i,j,k,m,f,g,h,y,c2,oPdf2
-    k=aline(ac,strt(stre(m.c,m.bu,"stream",1,2),m.b1,m.b)+m.ba,m.i1,m.zR)
+    local ac(m.i1),ac2(m.i1),d,e,f,g,h,i,j,k,m,y,c2,oPdf2
+    k=aline(ac,strt(stre(m.c,m.bu,"stream",m.i1,m.i2),m.b1,m.b)+m.ba,m.i1,m.zR)
     if m.k>m.i1
       if m.iKids=m.i0
         ** А если в этой строке список страниц, то его надо модифицировать
@@ -235,17 +238,31 @@ defi class cPdf as custom
                 stor m.i0 to g,h
                 y=m.b
                 for m=m.i to m.k
-                  h=m.h+m.i1
-                  if m.h>=m.n1
-                    g=m.g+m.i1
-                    y=m.y+tran(val(ac(m.m)))+m.zR+m.b
+                  ** заглянем в этот объект на случай, если там скрывается дочерний Kids
+                  d=val(ac(m.m))
+                  =fseek(m.nf,aObj(m.d))
+                  c2=iif(feof(m.nf),m.x,stre(fread(m.nf,qObj(m.d)),m.kids,m.b2,m.i1,m.i2))
+                  if len(m.c2)>m.i0
+                    d=aline(ac2,stre(m.c2,m.b1,m.b2,m.i1,m.i2),m.i1,m.zR)
+                  else
+                    ac2(m.i1)=ac(m.m)
+                    d=m.i1
                   endi
-                  if m.h>=m.n2
-                    exit
-                  endi
+                  ** формируем новый список страниц
+                  for e=m.i1 to m.d
+                    h=m.h+m.i1
+                    if m.h>=m.n1
+                      g=m.g+m.i1
+                      y=m.y+tran(val(ac2(m.e)))+m.zR+m.b
+                    endi
+                    if m.h>=m.n2
+                      m=m.k+m.i1
+                      exit
+                    endi
+                  endf
                 endf
                 h=pole2(@c,m.f)
-                c=left(m.c,m.f+4)+m.b+m.b1+m.y+"]"+subs(m.c,m.h)
+                c=left(m.c,m.f+m.i4)+m.b+m.b1+m.y+m.b2+subs(m.c,m.h)
                 ** изменяем количество страниц в /Count
                 m=at("/Count",m.c)
                 h=pole2(@c,m.m)
