@@ -22,7 +22,7 @@ para pdf,n1,n2
     i2=2
     i4=4
     ia=10
-    stor 0 to i0,xref,xref2,nObj,iInfo,iRoot,iKids
+    stor 0 to i0,g,xref,xref2,nObj,iInfo,iRoot,iKids
     zR=" 0 R"
     ba=" B A"
     eoff="OFF"
@@ -39,6 +39,9 @@ para pdf,n1,n2
     exact= set("exact")=m.eoff
     if m.exact
       set exact on
+    endi
+    if empt(m.n1)
+      n1=m.i0
     endi
     if type("m.n2")<>"N"
       n2=m.n1
@@ -97,6 +100,9 @@ para pdf,n1,n2
         =oPdf.scan(@c,m.i0)
         =fclo(m.nf)
         nf=-m.i1
+        if empt(m.n2)
+          retu m.g
+        endi
 
         ** 6. переиндексирование объектов
         k=3
@@ -226,7 +232,7 @@ retu m.k+at(m.bs,strt(subs(m.c,k+m.i1),">",m.bs)+m.bs)
 
 defi class cPdf as custom
   Func scan(c,iObj)
-    local ac(m.i1),ac2(m.i1),d,e,f,g,h,i,j,k,m,y,c2,oPdf2
+    local ac(m.i1),ac2(m.i1),d,e,f,h,i,j,k,m,y,c2,oPdf2
     k=aline(ac,strt(stre(m.c,m.bu,"stream",m.i1,m.i2),m.b1,m.b)+m.ba,m.i1,m.zR)
     if m.k>m.i1
       if m.iKids=m.i0
@@ -242,7 +248,7 @@ defi class cPdf as custom
               if m.j>m.i0 and m.j<=m.nObj
                 ** изменяем список объектов согласно параметров
                 ac(m.i)=subs(ac(m.i),m.h+6)
-                stor m.i0 to g,h
+                h=m.i0
                 y=m.b
                 for m=m.i to m.k-m.i1
                   ** заглянем в этот объект на случай, если там скрывается дочерний Kids
@@ -259,7 +265,7 @@ defi class cPdf as custom
                   endi
                   ** формируем новый список страниц
                   for e=m.i1 to m.d
-                    if m.h<m.n2
+                    if m.h<m.n2 or empt(m.n2)
                       h=m.h+m.i1
                       if m.h>=m.n1
                         g=m.g+m.i1
@@ -281,6 +287,9 @@ defi class cPdf as custom
             endi
           endf
           k=aline(ac,strt(m.c,m.b1,m.b)+m.ba,m.i1,m.zR)
+          if empt(m.n2)
+            retu
+          endi
         endi
       endi
       for i=m.i1 to m.k-m.i1
