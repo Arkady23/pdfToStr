@@ -25,7 +25,7 @@ para pdf,n1,n2
     i4=4
     ia=10
     i13=13
-    i23=23
+    i33=33
     stor 0 to i0,g,k,v,xref1,xref2,nObj,iInfo,iRoot,iKids
     zR=" 0 R"
     ba=" B A"
@@ -276,14 +276,18 @@ proc b_pdf
       ac(m.i1)=m.c+ac(m.i1)
       c=m.x
       for i=m.i1 to m.nc-m.i1
-        y=left(ac(m.i),m.i23)
+        v=m.i1
+        do whil asc(subs(ac(m.i),m.v,m.i1))<m.i33
+          v=m.v+m.i1
+        endd
+        y=subs(ac(m.i),m.v,m.i33)
         if m.b+wd2(@y,m.i3)=m.bobj
           j=val(m.y)
           if m.j>m.nObj
             nObj=m.j
             dime aObj(m.nObj)
           endi
-          aObj(m.j)=m.k
+          aObj(m.j)=m.k+m.v-m.i1
           k=m.k+len(ac(m.i))
         else
           j=m.i0
@@ -343,7 +347,11 @@ defi class cPdf as custom
                 y=m.b
                 for m=m.i to m.k-m.i1
                   ** заглянем в этот объект на случай, если там скрывается дочерний Kids
-                  d=val(ac1(m.m))
+                  v=m.i1
+                  do whil asc(subs(ac1(m.m),m.v,m.i1))<m.i33
+                    v=m.v+m.i1
+                  endd
+                  d=val(subs(ac1(m.m),m.v,m.i33))
                   =fseek(m.nf,aObj(m.d))
                   c2=iif(feof(m.nf),m.x,stre(fread(m.nf,qObj(m.d)),m.kids,m.b2,m.i1,m.i2))
                   if len(m.c2)>m.i0
