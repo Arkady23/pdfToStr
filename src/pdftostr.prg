@@ -204,11 +204,11 @@ para pdf,n1,n2
         m.zR+m.b+m.root+m.b+tran(iif(m.iRoot>m.na,kObj(m.iRoot),m.iRoot))+m.zR+" /Size "+ ;
         tran(m.na)+m.bz+m.c10+m.sxref+m.c10+tran(m.k)+m.c10+"%%EOF"+m.c10
     endi
-    if m.exact
-      set exact off
-    endi
     if m.nf>=m.i0
       =fclo(m.nf)
+    endi
+    if m.exact
+      set exact off
     endi
   endi
 retu m.x
